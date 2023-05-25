@@ -1,1 +1,1 @@
-# Maze
+![maze](https://github.com/DaniilSob2004/Maze/assets/106149184/90f415aa-5e8a-4255-a897-2886c1ab7ae2)
