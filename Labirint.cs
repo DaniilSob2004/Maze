@@ -1,25 +1,27 @@
 ﻿using System;
 using System.Windows.Forms;
 using System.Drawing;
+using System.Collections.Generic;
 using static Maze.MazeObject;
 
 namespace Maze
 {
     public class Labirint
     {
-        public enum GameValue { MaxHealth = 100, LossHealth = 25, AddHealth = 10, MaxEnergy = 500, LossEnergy = 1, AddEnergy = 25 };
+        public enum GameValue { MaxHealth = 100, LossHealth = 25, AddHealth = 10, MaxEnergy = 500, LossEnergy = 1, AddEnergy = 25, BombPlanted = 50 };
         public readonly Point finalPoint;  // координаты конца лабиринта
+        private static Labirint labirint = null;
 
         private int height;  // высота лабиринта
         private int width;  // ширина лабиринта
 
+        private Form parent;  // родитель
         private Player player;
-        private Form parent;
         private MazeObject[,] maze;
-        private PictureBox[,] images;
+        private List<MazeObject> enemies;
 
 
-        public Labirint(Form parent, int width, int height)
+        private Labirint(Form parent, int width, int height)
         {
             this.width = width;
             this.height = height;
@@ -27,17 +29,25 @@ namespace Maze
 
             player = new Player();
             maze = new MazeObject[height, width];
-            images = new PictureBox[height, width];
             finalPoint = new Point(width - 1, height - 3);
 
             StartSettings();
         }
 
 
-        // Свойства
         public MazeObject[,] Maze => maze;
-        public PictureBox[,] Images => images;
         public Point FinalPoint => finalPoint;
+        public Player Player => player;
+
+
+        public static Labirint GetInstance(Form parent = null, int width = 0, int height = 0)
+        {
+            if (labirint == null)
+            {
+                labirint = new Labirint(parent, width, height);
+            }
+            return labirint;
+        }
 
 
         private void StartSettings()
@@ -45,12 +55,15 @@ namespace Maze
             parent.Controls.Clear();
             player.Location = new Point(0, 2);
             player.StartSettings();
+            enemies = new List<MazeObject>();
+
             Generate();
         }
 
         private void Generate()
         {
             Random r = new Random();
+            bool isEnemy = false;
 
             for (int y = 0; y < height; y++)
             {
@@ -70,11 +83,12 @@ namespace Maze
                         current = MazeObjectType.Hall;
                     }
 
-                    else 
+                    else
                     {
                         if (r.Next(175) == 0)  // враг
                         {
                             current = MazeObjectType.Enemy;
+                            isEnemy = true;
                         }
 
                         else if (r.Next(175) == 0)  // энергетик
@@ -100,12 +114,17 @@ namespace Maze
                     }
 
                     maze[y, x] = new MazeObject(current);
-                    images[y, x] = new PictureBox();
-                    images[y, x].Location = new Point(x * maze[y, x].Width, y * maze[y, x].Height);
-                    images[y, x].Parent = parent;
-                    images[y, x].Size = new Size(maze[y, x].Width, maze[y, x].Height);
-                    images[y, x].BackgroundImage = maze[y, x].Texture;
-                    images[y, x].Visible = false;
+                    maze[y, x].PictureBox.Location = new Point(x * maze[y, x].Width, y * maze[y, x].Height);
+                    maze[y, x].PictureBox.Parent = parent;
+                    maze[y, x].PictureBox.Size = new Size(maze[y, x].Width, maze[y, x].Height);
+                    maze[y, x].PictureBox.BackgroundImage = maze[y, x].Texture;
+                    maze[y, x].PictureBox.Visible = false;
+
+                    if (isEnemy)
+                    {
+                        enemies.Add(maze[y, x]);
+                        isEnemy = false;
+                    }
                 }
             }
             ShowInfo();
@@ -117,9 +136,10 @@ namespace Maze
             {
                 for (int x = 0; x < width; x++)
                 {
-                    images[y, x].Visible = true;
+                    maze[y, x].PictureBox.Visible = true;
                 }
             }
+            Player.l = GetInstance();
         }
 
         public void ShowInfo()
@@ -136,42 +156,63 @@ namespace Maze
             switch (e.KeyCode)
             {
                 case Keys.Up:
-                    if (player.CheckCollision(this, playerX, playerY - 1))
+                    if (player.CheckCollision(playerX, playerY - 1))
                     {
-                        player.Move(this, playerX, playerY - 1);
+                        player.Move(playerX, playerY - 1);
                         player.Location = new Point(playerX, playerY - 1);
                     }
                     break;
 
                 case Keys.Down:
-                    if (player.CheckCollision(this, playerX, playerY + 1))
+                    if (player.CheckCollision(playerX, playerY + 1))
                     {
-                        player.Move(this, playerX, playerY + 1);
+                        player.Move(playerX, playerY + 1);
                         player.Location = new Point(playerX, playerY + 1);
                     }
                     break;
 
                 case Keys.Left:
-                    if (player.CheckCollision(this, playerX - 1, playerY))
+                    if (player.CheckCollision(playerX - 1, playerY))
                     {
-                        player.Move(this, playerX - 1, playerY);
+                        player.Move(playerX - 1, playerY);
                         player.Location = new Point(playerX - 1, playerY);
                     }
                     break;
 
                 case Keys.Right:
-                    if (player.CheckCollision(this, playerX + 1, playerY))
+                    if (player.CheckCollision(playerX + 1, playerY))
                     {
-                        player.Move(this, playerX + 1, playerY);
+                        player.Move(playerX + 1, playerY);
                         player.Location = new Point(playerX + 1, playerY);
                     }
                     break;
             }
 
-            CheckEndGame();
+            if (!CheckEndGame())
+            {
+                CheckDrawingBomb();  // проверка отрисовки бомбы
+            }
         }
 
-        private void CheckEndGame()
+        public void BombPlanted()
+        {
+            // если бомба устанавливается НЕ на одно и тоже место
+            if (!player.IsBombPlanted)
+            {
+                player.BombPlanted();
+            }
+        }
+
+        private void CheckDrawingBomb()
+        {
+            if (player.IsBombPlanted)  // если бомба установлена
+            {
+                player.DrawingBomb();  // отрисовка бомбы
+                player.IsBombPlanted = false;
+            }
+        }
+
+        public bool CheckEndGame()
         {
             if (finalPoint.X == player.Location.X && finalPoint.Y == player.Location.Y)
             {
@@ -196,6 +237,9 @@ namespace Maze
                 GameSound.Loss();
                 GameRestart("Поражение - закончилась энергия!");
             }
+            else return false;
+
+            return true;
         }
 
         private void GameRestart(string text)

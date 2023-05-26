@@ -26,15 +26,22 @@ namespace Maze
             StartPosition = FormStartPosition.CenterScreen;
         }
 
-        public void StartGame() {
-            l = new Labirint(this, sizeX, sizeY);
+        public void StartGame()
+        {
+            l = Labirint.GetInstance(this, sizeX, sizeY);
             l.Show();
         }
 
         private void Form1_KeyDown(object sender, KeyEventArgs e)
         {
-            // двигаем персонажа
-            l.MovePLayer(e);
+            if (e.KeyCode == Keys.Enter)
+            {
+                l.BombPlanted();  // вызываем атаку игрока
+            }
+            else
+            {
+                l.MovePLayer(e);  // двигаем персонажа
+            }
         }
     }
 }

@@ -51,5 +51,10 @@ namespace Maze
         {
             PlaySound($@"{DIR}\step.wav");
         }
+
+        public static void Detonation()
+        {
+            PlaySound($@"{DIR}\detonation.wav");
+        }
     }
 }
