@@ -7,12 +7,14 @@ namespace Maze
     {
         private int sizeX = 40;
         private int sizeY = 20;
+        private int sizeElem = 16;
         private Labirint l;
 
         public Form1()
         {
             InitializeComponent();
             Options();
+            l = Labirint.GetInstance(this, sizeX, sizeY, sizeElem);
             GameSound.BackgroundMusic();
         }
 
@@ -23,14 +25,13 @@ namespace Maze
             FormBorderStyle = FormBorderStyle.FixedSingle;
             BackColor = Color.FromArgb(255, 92, 118, 137);
 
-            Width = sizeX * 16 + (Size.Width - ClientSize.Width);
-            Height = sizeY * 16 + (Size.Height - ClientSize.Height);
+            Width = sizeX * sizeElem + (Size.Width - ClientSize.Width);
+            Height = sizeY * sizeElem + (Size.Height - ClientSize.Height);
             StartPosition = FormStartPosition.CenterScreen;
         }
 
         public void StartGame()
         {
-            l = Labirint.GetInstance(this, sizeX, sizeY);
             l.Show();
         }
 
@@ -48,7 +49,8 @@ namespace Maze
 
         private void StartBtn_Click(object sender, System.EventArgs e)
         {
-            BackgroundImage = null;
+            ClearMenu();
+            System.GC.Collect();
             StartGame();
         }
 
@@ -64,6 +66,13 @@ namespace Maze
                 case DialogResult.No:
                     break;
             }
+        }
+
+        private void ClearMenu()
+        {
+            BackgroundImage = null;
+            Controls.Remove(startBtn);
+            Controls.Remove(exitBtn);
         }
     }
 }

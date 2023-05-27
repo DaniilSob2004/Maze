@@ -12,6 +12,7 @@ namespace Maze
 
         public enum GameValue { MaxHealth = 100, LossHealth = 25, AddHealth = 10, MaxEnergy = 500, LossEnergy = 1, AddEnergy = 25, BombPlanted = 50 };
         public readonly Point finalPoint;  // координаты конца лабиринта
+        public readonly Point startPoint;  // координаты начала лабиринта
         private static Labirint labirint = null;
 
         private int height;  // высота лабиринта
@@ -23,15 +24,18 @@ namespace Maze
         private List<Enemy> enemies;
 
 
-        private Labirint(Form parent, int width, int height)
+        private Labirint(Form parent, int width, int height, int sizeElem)
         {
             this.width = width;
             this.height = height;
             this.parent = parent;
+            MazeObject.Size = new Size(sizeElem, sizeElem);
+
+            finalPoint = new Point(width - 1, height - 3);
+            startPoint = new Point(0, 2);
 
             player = new Player();
             maze = new MazeObject[height, width];
-            finalPoint = new Point(width - 1, height - 3);
             enemies = new List<Enemy>();
 
             StartSettings();
@@ -40,14 +44,15 @@ namespace Maze
 
         public MazeObject[,] Maze => maze;
         public Point FinalPoint => finalPoint;
+        public Point StartPoint => startPoint;
         public Player Player => player;
 
 
-        public static Labirint GetInstance(Form parent = null, int width = 0, int height = 0)
+        public static Labirint GetInstance(Form parent = null, int width = 0, int height = 0, int sizeElem = 0)
         {
             if (labirint == null)
             {
-                labirint = new Labirint(parent, width, height);
+                labirint = new Labirint(parent, width, height, sizeElem);
             }
             return labirint;
         }
@@ -55,9 +60,7 @@ namespace Maze
 
         private void StartSettings()
         {
-            parent.Controls.Clear();
-
-            player.Location = new Point(0, 2);
+            player.Location = startPoint;
             player.StartSettings();
             enemies.Clear();
 
@@ -116,12 +119,15 @@ namespace Maze
                         }
                     }
 
-                    maze[y, x] = new MazeObject(current);
-                    maze[y, x].PictureBox.Location = new Point(x * maze[y, x].Width, y * maze[y, x].Height);
-                    maze[y, x].PictureBox.Parent = parent;
-                    maze[y, x].PictureBox.Size = new Size(maze[y, x].Width, maze[y, x].Height);
-                    maze[y, x].PictureBox.BackgroundImage = maze[y, x].Texture;
-                    maze[y, x].PictureBox.Visible = false;
+                    if (maze[y, x] == null)  // если первая генерация
+                    {
+                        maze[y, x] = new MazeObject(current);
+                        maze[y, x].PictureBox.Location = new Point(x * MazeObject.Size.Width, y * MazeObject.Size.Height);
+                        maze[y, x].PictureBox.Parent = parent;
+                        maze[y, x].PictureBox.Size = MazeObject.Size;
+                        maze[y, x].PictureBox.Visible = false;
+                    }
+                    else maze[y, x].ChangeBackgroundImage(current);
 
                     if (isEnemy)
                     {
@@ -130,7 +136,6 @@ namespace Maze
                     }
                 }
             }
-            ShowInfo();
         }
 
         public void Show()
@@ -145,7 +150,8 @@ namespace Maze
             Player.InitialLabirint();
             Enemy.InitialLabirint();
             Bomb.InitialLabirint();
-            GC.Collect();
+
+            ShowInfo();
         }
 
         public void ShowInfo()
@@ -266,6 +272,8 @@ namespace Maze
 
         public bool CheckEndGame()
         {
+            ShowInfo();
+
             if (player.PlayersHealth <= 0)
             {
                 GameSound.Loss();
@@ -305,7 +313,7 @@ namespace Maze
         {
             MessageBox.Show(text, "Message");
             StartSettings();
-            Show();
+            ShowInfo();
         }
     }
 }

@@ -25,7 +25,7 @@ namespace Maze
 
         public Player(Point location = new Point())
         {
-            this.location = location;
+            bombs = new List<Bomb>();
             StartSettings();
         }
 
@@ -88,7 +88,7 @@ namespace Maze
 
         public void StartSettings()
         {
-            bombs = new List<Bomb>();
+            bombs.Clear();
             isBombPlanted = false;
             totalMedal = allPlayersMedal = 0;
             totalHealth = (int)GameValue.MaxHealth;
@@ -114,8 +114,6 @@ namespace Maze
                 l.AddEnemy();
                 stepAfterEnemy = 0;
             }
-
-            l.ShowInfo();
         }
 
         public bool CheckCollision(int newX, int newY)

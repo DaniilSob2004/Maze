@@ -84,7 +84,6 @@ namespace Maze
             if (killPlayer)
             {
                 l.Player.PlayersHealth = 0;
-                l.ShowInfo();
                 l.CheckEndGame();
             }
         }

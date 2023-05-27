@@ -1,5 +1,4 @@
-﻿using System;
-using System.Drawing;
+﻿using System.Drawing;
 using System.Windows.Forms;
 
 namespace Maze
@@ -7,6 +6,7 @@ namespace Maze
     public class MazeObject
     {
         public enum MazeObjectType { Hall, Wall, Medal, Enemy, Player, Pill, Energy, Bomb, Detonation };
+        private static Size size = new Size(16, 16);
         public static Bitmap[] images = {new Bitmap(@"image\hall.png"),
                                          new Bitmap(@"image\wall.png"),
                                          new Bitmap(@"image\medal.png"),
@@ -16,18 +16,16 @@ namespace Maze
                                          new Bitmap(@"image\energy.png"),
                                          new Bitmap(@"image\bomb.png"),
                                          new Bitmap(@"image\detonation.png")};
+       
         private MazeObjectType type;
-        private int width;
-        private int height;
         private Image texture;
         private PictureBox pictureBox;
 
+
         public MazeObject(MazeObjectType type)
         {
-            Type = type;
-            Width = 16;
-            Height = 16;
             pictureBox = new PictureBox();
+            ChangeBackgroundImage(type);
         }
 
         public MazeObjectType Type
@@ -40,24 +38,10 @@ namespace Maze
             }
         }
 
-        public int Width
+        public static Size Size
         {
-            get => width;
-            set
-            {
-                if (value <= 0) throw new ArgumentOutOfRangeException("Error value (width)!");
-                width = value;
-            }
-        }
-
-        public int Height
-        {
-            get => height;
-            set
-            {
-                if (value <= 0) throw new ArgumentOutOfRangeException("Error value (height)!");
-                height = value;
-            }
+            get => size;
+            set => size = value;
         }
 
         public Image Texture

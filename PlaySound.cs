@@ -1,6 +1,4 @@
-﻿using System;
-using System.Media;
-using System.Threading;
+﻿using System.Media;
 using NAudio.Wave;
 
 namespace Maze
