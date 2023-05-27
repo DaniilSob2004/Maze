@@ -8,7 +8,7 @@ namespace Maze
 {
     public class Bomb
     {
-        private static Labirint l = Labirint.GetInstance();
+        private static Labirint l;
 
         private Point location;
         private Timer t;
@@ -16,7 +16,7 @@ namespace Maze
 
         public Bomb(Point location = new Point())
         {
-            this.location = location;
+            Location = location;
             t = new Timer();
             killPlayer = false;
         }
@@ -25,6 +25,11 @@ namespace Maze
         {
             get => location;
             set => location = value;
+        }
+
+        public static void InitialLabirint()
+        {
+            l = Labirint.GetInstance();
         }
 
 
@@ -55,7 +60,7 @@ namespace Maze
 
                 if (type == MazeObjectType.Enemy)
                 {
-                    // враг убит
+                    l.DelEnemy(new Point(pAroundBomb[i].X, pAroundBomb[i].Y));
                 }
                 else if (type == MazeObjectType.Player)
                 {

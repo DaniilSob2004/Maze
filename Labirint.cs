@@ -8,6 +8,8 @@ namespace Maze
 {
     public class Labirint
     {
+        public static Random r = new Random();
+
         public enum GameValue { MaxHealth = 100, LossHealth = 25, AddHealth = 10, MaxEnergy = 500, LossEnergy = 1, AddEnergy = 25, BombPlanted = 50 };
         public readonly Point finalPoint;  // координаты конца лабиринта
         private static Labirint labirint = null;
@@ -18,7 +20,7 @@ namespace Maze
         private Form parent;  // родитель
         private Player player;
         private MazeObject[,] maze;
-        private List<MazeObject> enemies;
+        private List<Enemy> enemies;
 
 
         private Labirint(Form parent, int width, int height)
@@ -30,6 +32,7 @@ namespace Maze
             player = new Player();
             maze = new MazeObject[height, width];
             finalPoint = new Point(width - 1, height - 3);
+            enemies = new List<Enemy>();
 
             StartSettings();
         }
@@ -53,16 +56,16 @@ namespace Maze
         private void StartSettings()
         {
             parent.Controls.Clear();
+
             player.Location = new Point(0, 2);
             player.StartSettings();
-            enemies = new List<MazeObject>();
+            enemies.Clear();
 
             Generate();
         }
 
         private void Generate()
         {
-            Random r = new Random();
             bool isEnemy = false;
 
             for (int y = 0; y < height; y++)
@@ -85,29 +88,29 @@ namespace Maze
 
                     else
                     {
-                        if (r.Next(175) == 0)  // враг
+                        if (r.Next(140) == 0)  // враг
                         {
                             current = MazeObjectType.Enemy;
                             isEnemy = true;
                         }
 
-                        else if (r.Next(175) == 0)  // энергетик
+                        else if (r.Next(200) == 0)  // энергетик
                         {
                             current = MazeObjectType.Energy;
                         }
 
-                        else if (r.Next(175) == 0)  // лекарство
+                        else if (r.Next(200) == 0)  // лекарство
                         {
                             current = MazeObjectType.Pill;
                         }
 
-                        else if (r.Next(150) == 0)  // медаль
+                        else if (r.Next(75) == 0)  // медаль
                         {
                             current = MazeObjectType.Medal;
                             player.AllPlayersMedal++;
                         }
 
-                        else if (r.Next(5) == 0)  // стена
+                        else if (r.Next(4) == 0)  // стена
                         {
                             current = MazeObjectType.Wall;
                         }
@@ -122,7 +125,7 @@ namespace Maze
 
                     if (isEnemy)
                     {
-                        enemies.Add(maze[y, x]);
+                        enemies.Add(new Enemy(new Point(x, y)));
                         isEnemy = false;
                     }
                 }
@@ -139,12 +142,15 @@ namespace Maze
                     maze[y, x].PictureBox.Visible = true;
                 }
             }
-            Player.l = GetInstance();
+            Player.InitialLabirint();
+            Enemy.InitialLabirint();
+            Bomb.InitialLabirint();
+            GC.Collect();
         }
 
         public void ShowInfo()
         {
-            parent.Text = $"Maze   (Медалей:  {player.PlayersMedal}/{player.AllPlayersMedal},  Здоровье: {player.PlayersHealth}%,  Энергия: {player.PlayersEnergy})";
+            parent.Text = $"Maze   (Медалей:  {player.PlayersMedal}/{player.AllPlayersMedal},  Здоровье: {player.PlayersHealth}%,  Энергия: {player.PlayersEnergy},  Врагов: {enemies.Count})";
         }
 
 
@@ -188,6 +194,12 @@ namespace Maze
                     break;
             }
 
+            if (player.IsHitEnemy)  // если игрок попал на врага
+            {
+                DelEnemy(player.Location);  // удаляем врага из списка
+                player.IsHitEnemy = false;
+            }
+
             if (!CheckEndGame())
             {
                 CheckDrawingBomb();  // проверка отрисовки бомбы
@@ -209,24 +221,52 @@ namespace Maze
             {
                 player.DrawingBomb();  // отрисовка бомбы
                 player.IsBombPlanted = false;
+
+                GameSound.CreateBomb();
             }
         }
 
+
+        public void AddEnemy()
+        {
+            int randX, randY;
+            bool flag = false;
+
+            do
+            {
+                randX = r.Next(width);
+                randY = r.Next(height);
+                if (maze[randY, randX].Type == MazeObjectType.Hall)
+                {
+                    maze[randY, randX].ChangeBackgroundImage(MazeObjectType.Enemy);
+                    enemies.Add(new Enemy(new Point(randX, randY)));
+                    flag = true;
+                }
+            } while (!flag);
+        }
+
+        public void DelEnemy(Point p)
+        {
+            enemies.Remove(GetEnemyByLoacation(p));
+            ShowInfo();
+        }
+
+        public Enemy GetEnemyByLoacation(Point p)
+        {
+            foreach (Enemy enemy in enemies)
+            {
+                if (enemy.Location == p)
+                {
+                    return enemy;
+                }
+            }
+            return null;
+        }
+
+
         public bool CheckEndGame()
         {
-            if (finalPoint.X == player.Location.X && finalPoint.Y == player.Location.Y)
-            {
-                GameSound.Winner();
-                GameRestart("Победа - найден выход!");
-            }
-
-            else if (player.PlayersMedal == player.AllPlayersMedal)
-            {
-                GameSound.Winner();
-                GameRestart("Победа - медали собраны!");
-            }
-
-            else if (player.PlayersHealth <= 0)
+            if (player.PlayersHealth <= 0)
             {
                 GameSound.Loss();
                 GameRestart("Поражение - закончилось здоровье!");
@@ -237,6 +277,25 @@ namespace Maze
                 GameSound.Loss();
                 GameRestart("Поражение - закончилась энергия!");
             }
+
+            else if (finalPoint.X == player.Location.X && finalPoint.Y == player.Location.Y)
+            {
+                GameSound.Winner();
+                GameRestart("Победа - найден выход!");
+            }
+
+            else if (player.PlayersMedal == player.AllPlayersMedal && player.AllPlayersMedal != 0)
+            {
+                GameSound.Winner();
+                GameRestart("Победа - медали собраны!");
+            }
+
+            else if (enemies.Count == 0)
+            {
+                GameSound.Winner();
+                GameRestart("Победа - враги уничтожены!");
+            }
+
             else return false;
 
             return true;

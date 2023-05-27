@@ -13,11 +13,13 @@ namespace Maze
         {
             InitializeComponent();
             Options();
-            StartGame();
+            GameSound.BackgroundMusic();
         }
 
         public void Options()
         {
+            Text = "Maze";
+
             FormBorderStyle = FormBorderStyle.FixedSingle;
             BackColor = Color.FromArgb(255, 92, 118, 137);
 
@@ -41,6 +43,26 @@ namespace Maze
             else
             {
                 l.MovePLayer(e);  // двигаем персонажа
+            }
+        }
+
+        private void StartBtn_Click(object sender, System.EventArgs e)
+        {
+            BackgroundImage = null;
+            StartGame();
+        }
+
+        private void ExitBtn_Click(object sender, System.EventArgs e)
+        {
+            var answer = MessageBox.Show("Вы действительно хотите выйти?", "Question", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            switch (answer)
+            {
+                case DialogResult.Yes:
+                    Close();
+                    break;
+
+                case DialogResult.No:
+                    break;
             }
         }
     }
