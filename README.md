@@ -1,1 +1,2 @@
-![maze](https://github.com/DaniilSob2004/Maze/assets/106149184/90f415aa-5e8a-4255-a897-2886c1ab7ae2)
+![maze](https://github.com/DaniilSob2004/Maze/assets/106149184/bea07926-05b3-4425-bee9-f1299d861d10)
+![maze_menu](https://github.com/DaniilSob2004/Maze/assets/106149184/c556cdd2-d629-49fa-b1ad-16763c82ac80)
