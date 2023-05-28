@@ -34,40 +34,21 @@ namespace Maze
             get => location;
             set => location = value;
         }
-        public List<Bomb> Bombs
-        {
-            get => bombs;
-        }
+        public List<Bomb> Bombs => bombs;
         public int AllPlayersMedal
         {
             get => allPlayersMedal;
             set => allPlayersMedal = value;
         }
-        public int PlayersMedal
-        {
-            get => totalMedal;
-            set => totalMedal = value;
-        }
+        public int PlayersMedal => totalMedal;
         public int PlayersHealth
         {
             get => totalHealth;
             set => totalHealth = value;
         }
-        public int PlayersEnergy
-        {
-            get => totalEnergy;
-            set => totalEnergy = value;
-        }
-        public bool UsePill
-        {
-            get => usePill;
-            set => usePill = value;
-        }
-        public int StepAfterPill
-        {
-            get => stepAfterPill;
-            set => stepAfterPill = value;
-        }
+        public int PlayersEnergy => totalEnergy;
+        public bool UsePill => usePill;
+        public int StepAfterPill => stepAfterPill;
         public bool IsHitEnemy
         {
             get => isHitEnemy;
@@ -137,6 +118,7 @@ namespace Maze
                 case MazeObjectType.Enemy:
                     LossHealth();
                     isHitEnemy = true;
+                    l.GetEnemyByLoacation(new Point(newX, newY)).StopMoving();
                     break;
 
                 case MazeObjectType.Pill:
@@ -181,7 +163,7 @@ namespace Maze
         }
 
 
-        private void LossHealth()
+        public void LossHealth()
         {
             if (totalHealth - (int)GameValue.LossHealth < 0)
             {

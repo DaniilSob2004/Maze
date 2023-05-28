@@ -140,18 +140,18 @@ namespace Maze
 
         public void Show()
         {
-            for (int y = 0; y < height; y++)
+            if (!maze[0, 0].PictureBox.Visible)
             {
-                for (int x = 0; x < width; x++)
+                for (int y = 0; y < height; y++)
                 {
-                    maze[y, x].PictureBox.Visible = true;
+                    for (int x = 0; x < width; x++)
+                    {
+                        maze[y, x].PictureBox.Visible = true;
+                    }
                 }
             }
-            Player.InitialLabirint();
-            Enemy.InitialLabirint();
-            Bomb.InitialLabirint();
-
             ShowInfo();
+            StartMovingEnemies();
         }
 
         public void ShowInfo()
@@ -233,6 +233,22 @@ namespace Maze
         }
 
 
+        public void StartMovingEnemies()
+        {
+            foreach (Enemy enemy in enemies) enemy.StartMoving();
+        }
+
+        private void EndMovingEnemies()
+        {
+            foreach (Enemy enemy in enemies) enemy.StopMoving();
+        }
+
+        public void EnemyHitPlayer(Point enemyPoint)
+        {
+            player.LossHealth();
+            DelEnemy(enemyPoint);
+        }
+
         public void AddEnemy()
         {
             int randX, randY;
@@ -246,6 +262,7 @@ namespace Maze
                 {
                     maze[randY, randX].ChangeBackgroundImage(MazeObjectType.Enemy);
                     enemies.Add(new Enemy(new Point(randX, randY)));
+                    enemies[enemies.Count - 1].StartMoving();
                     flag = true;
                 }
             } while (!flag);
@@ -309,11 +326,12 @@ namespace Maze
             return true;
         }
 
-        private void GameRestart(string text)
+        public void GameRestart(string text)
         {
+            EndMovingEnemies();
             MessageBox.Show(text, "Message");
             StartSettings();
-            ShowInfo();
+            Show();
         }
     }
 }

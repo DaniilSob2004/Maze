@@ -15,10 +15,11 @@ namespace Maze
             InitializeComponent();
             Options();
             l = Labirint.GetInstance(this, sizeX, sizeY, sizeElem);
+            InitialLabirintObjects();
             GameSound.BackgroundMusic();
         }
 
-        public void Options()
+        private void Options()
         {
             Text = "Maze";
 
@@ -30,7 +31,14 @@ namespace Maze
             StartPosition = FormStartPosition.CenterScreen;
         }
 
-        public void StartGame()
+        private void InitialLabirintObjects()
+        {
+            Player.InitialLabirint();
+            Enemy.InitialLabirint();
+            Bomb.InitialLabirint();
+        }
+
+        private void StartGame()
         {
             l.Show();
         }
@@ -40,6 +48,10 @@ namespace Maze
             if (e.KeyCode == Keys.Enter)
             {
                 l.BombPlanted();  // вызываем атаку игрока
+            }
+            else if (e.KeyCode == Keys.Escape)
+            {
+                l.GameRestart("Перезапуск игры");  // перезапуск лабиринта
             }
             else
             {
