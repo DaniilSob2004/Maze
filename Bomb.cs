@@ -9,11 +9,11 @@ namespace Maze
     {
         private static Labirint l;
 
-        private Point location;
+        private Point location;  // координаты
         private Timer t;
-        private bool killPlayer;
+        private bool killPlayer;  // убит ли игрок
 
-        public Bomb(Point location = new Point())
+        public Bomb(Point location)
         {
             Location = location;
             t = new Timer();
@@ -28,12 +28,13 @@ namespace Maze
 
         public static void InitialLabirint()
         {
-            l = Labirint.GetInstance();
+            l = Labirint.GetInstance();  // получаем объект Labirint, паттерн Одиночка
         }
 
 
         public void StartTimerBeforeDetonation()
         {
+            // настройки таймера до взрыва
             t.Interval = 2500;
             t.Tick -= T_AfterTick;
             t.Tick += T_BeforeTick;
@@ -42,6 +43,7 @@ namespace Maze
 
         public void StartTimerAfterDetonation()
         {
+            // настройки таймера после взрыва
             t.Interval = 1500;
             t.Tick -= T_BeforeTick;
             t.Tick += T_AfterTick;
@@ -50,84 +52,90 @@ namespace Maze
 
         private void Detonation()
         {
-            List<Point> pAroundBomb = GetPointsAroundBomb();
+            List<Point> pAroundBomb = GetPointsAroundBomb();  // получаем координаты вокруг бомбы
 
             for (int i = 0; i < pAroundBomb.Count; i++)
             {
-                MazeObjectType type = l.Maze[pAroundBomb[i].Y, pAroundBomb[i].X].Type;
-                l.Maze[pAroundBomb[i].Y, pAroundBomb[i].X].ChangeBackgroundImage(MazeObjectType.Detonation);
+                MazeObjectType type = l.Maze[pAroundBomb[i].Y, pAroundBomb[i].X].Type;  // получаем тип объекта
+                l.Maze[pAroundBomb[i].Y, pAroundBomb[i].X].ChangeBackgroundImage(MazeObjectType.Detonation);  // меняем текстуру на взрыв
 
-                if (type == MazeObjectType.Enemy)
+                if (type == MazeObjectType.Enemy)  // если это враг, то удаляем
                 {
-                    l.DelEnemy(new Point(pAroundBomb[i].X, pAroundBomb[i].Y));
+                    l.DelEnemy(pAroundBomb[i]);
                 }
-                else if (type == MazeObjectType.Player)
+                else if (type == MazeObjectType.Player)  // если это игрок, то убит
                 {
                     killPlayer = true;
                 }
             }
             GameSound.Detonation();
-            StartTimerAfterDetonation();
+            StartTimerAfterDetonation();  // запуск таймера после взрыва
         }
 
         private void AfterDetonation()
         {
-            List<Point> pAroundBomb = GetPointsAroundBomb();
+            List<Point> pAroundBomb = GetPointsAroundBomb();  // получаем координаты вокруг бомбы
             l.Player.Bombs.RemoveAt(0);  // удаляем бомбу
 
             for (int i = 0; i < pAroundBomb.Count; i++)
             {
-                l.Maze[pAroundBomb[i].Y, pAroundBomb[i].X].ChangeBackgroundImage(MazeObjectType.Hall);
+                MazeObjectType type = l.Maze[pAroundBomb[i].Y, pAroundBomb[i].X].Type;  // получаем тип объекта
+                l.Maze[pAroundBomb[i].Y, pAroundBomb[i].X].ChangeBackgroundImage(MazeObjectType.Hall);  // меняем текстуру на коридор
+
+                if (type == MazeObjectType.Enemy)  // если это враг, то удаляем
+                {
+                    l.DelEnemy(pAroundBomb[i]);
+                }
+                else if (type == MazeObjectType.Player)  // если это игрок, то убит
+                {
+                    killPlayer = true;
+                }
             }
 
-            if (killPlayer)
+            if (killPlayer)  // если игрок убит
             {
                 l.Player.PlayersHealth = 0;
-                l.CheckEndGame();
+                l.CheckEndGame();  // проверка проигрыша
             }
         }
 
         private void T_BeforeTick(object sender, System.EventArgs e)
         {
-            ((Timer)sender).Stop();
+            ((Timer)sender).Stop();  // останавливаем таймер
             Detonation();
         }
 
         private void T_AfterTick(object sender, System.EventArgs e)
         {
-            ((Timer)sender).Stop();
+            ((Timer)sender).Stop();  // останавливаем таймер
             AfterDetonation();
         }
 
         private List<Point> GetPointsAroundBomb()
         {
             // все точки вокруг бомбы, начиная с верхней левой
-            var allAroundPoints = new Point[] { new Point(location.X - 1, location.Y - 1),
-                                                new Point(location.X, location.Y - 1),
-                                                new Point(location.X + 1, location.Y - 1),
-                                                new Point(location.X + 1, location.Y),
-                                                new Point(location.X + 1, location.Y + 1),
-                                                new Point(location.X, location.Y + 1),
-                                                new Point(location.X - 1, location.Y + 1),
-                                                new Point(location.X - 1, location.Y),
-                                                location};
+            List<Point> pAroundBomb = new List<Point> { new Point(location.X - 1, location.Y - 1),
+                                                        new Point(location.X, location.Y - 1),
+                                                        new Point(location.X + 1, location.Y - 1),
+                                                        new Point(location.X + 1, location.Y),
+                                                        new Point(location.X + 1, location.Y + 1),
+                                                        new Point(location.X, location.Y + 1),
+                                                        new Point(location.X - 1, location.Y + 1),
+                                                        new Point(location.X - 1, location.Y),
+                                                        location};
 
-            // точки которые нужно уничтожить
-            var pAroundBomb = new List<Point>();
-            for (int i = 0; i < allAroundPoints.Length; i++)
+            for (int i = 0; i < pAroundBomb.Count; i++)
             {
-                switch (l.Maze[allAroundPoints[i].Y, allAroundPoints[i].X].Type)
+                switch (l.Maze[pAroundBomb[i].Y, pAroundBomb[i].X].Type)
                 {
-                    case MazeObjectType.Wall:
-                        break;
-
-                    default:
-                        pAroundBomb.Add(allAroundPoints[i]);
+                    case MazeObjectType.Wall:  // если по этой координате находится стена, то удаляем из списка
+                        pAroundBomb.RemoveAt(i);
+                        i--;
                         break;
                 }
             }
 
-            return pAroundBomb;
+            return pAroundBomb;  // точки которые нужно уничтожить
         }
     }
 }

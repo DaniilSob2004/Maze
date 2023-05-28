@@ -10,8 +10,8 @@ namespace Maze
     {
         private static Labirint l;
 
-        private Point location;
-        private List<Bomb> bombs;
+        private Point location;  // координаты
+        private List<Bomb> bombs;  // коллекция всех установленных бомб
 
         private int allPlayersMedal;  // все медали которые есть в лабиринте
         private int totalMedal;  // медали игрока
@@ -60,15 +60,25 @@ namespace Maze
             set => isBombPlanted = value;
         }
 
+        public void SetX(int x)
+        {
+            location.X = x;
+        }
+
+        public void SetY(int y)
+        {
+            location.Y = y;
+        }
 
         public static void InitialLabirint()
         {
-            l = Labirint.GetInstance();
+            l = Labirint.GetInstance();  // получаем объект Labirint, паттерн Одиночка
         }
 
 
         public void StartSettings()
         {
+            // начальные настройки
             bombs.Clear();
             isBombPlanted = false;
             totalMedal = allPlayersMedal = 0;
@@ -90,20 +100,24 @@ namespace Maze
             // если игрок выпил лекарство, то прибавляем перемещение
             if (usePill) stepAfterPill++;
 
+            // если игрок сделал 20 перемещений
             if (++stepAfterEnemy == 20)
             {
-                l.AddEnemy();
+                l.AddEnemy();  // добавляем нового врага
                 stepAfterEnemy = 0;
             }
         }
 
         public bool CheckCollision(int newX, int newY)
         {
-            if (newX < 0) return false;
+            if (newX < 0) return false;  // если это стартовая точка
 
             switch (l.Maze[newY, newX].Type)
             {
-                case MazeObjectType.Wall:
+                case MazeObjectType.Wall:  // если стена, то столкновение
+                    return false;
+
+                case MazeObjectType.Bomb:
                     return false;
 
                 case MazeObjectType.Hall:
@@ -116,20 +130,19 @@ namespace Maze
                     break;
 
                 case MazeObjectType.Enemy:
-                    LossHealth();
+                    LossHealth();  // отнимаем здоровье
                     isHitEnemy = true;
-                    l.GetEnemyByLoacation(new Point(newX, newY)).StopMoving();
                     break;
 
                 case MazeObjectType.Pill:
-                    if (totalHealth == (int)GameValue.MaxHealth) return false;
-                    AddHealth();
+                    if (totalHealth == (int)GameValue.MaxHealth) return false;  // если здоровье максимально, то нельзя выпить лекарство
+                    AddHealth();  // добавляем здоровье
                     break;
 
                 case MazeObjectType.Energy:
                     // энергетик можно выпить, только после 10 перемещений с момента принятия лекарства
                     if (!usePill || stepAfterPill < 10 || totalEnergy == (int)GameValue.MaxEnergy) return false;
-                    AddEnergy();
+                    AddEnergy();  // добавляем энергию
                     break;
             }
             return true;
@@ -138,15 +151,13 @@ namespace Maze
 
         public void BombPlanted()
         {
-            Bomb bomb = new Bomb(new Point(location.X, location.Y));
-            bombs.Add(bomb);
-
+            bombs.Add(new Bomb(location));  // создаём бомбу
             IsBombPlanted = true;
         }
 
         public void DrawingBomb()
         {
-            if (LossEnergy())
+            if (LossEnergy())  // если энергии хватает
             {
                 int last = bombs.Count - 1;
 
@@ -186,7 +197,7 @@ namespace Maze
             {
                 totalHealth += (int)GameValue.AddHealth;
             }
-            usePill = true;
+            usePill = true;  // выпил ли лекарство
             GameSound.DrinkPill();
         }
 

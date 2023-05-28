@@ -10,18 +10,18 @@ namespace Maze
         public enum Direction { Up, Down, Left, Right };
         private static Labirint l;
 
-        private Point location;
-        private Point nextLocation;
+        private Point location;  // координаты
+        private Point nextLocation;  // следующая координата
         private Timer t;
-        private Direction direction;
-        private bool isHitPlayer;
+        private Direction direction;  // направление
+        private bool isHitPlayer;  // попал ли на игрока
 
 
-        public Enemy(Point location = new Point())
+        public Enemy(Point location)
         {
             Location = location;
             SettingsTimer();
-            direction = (Direction)Labirint.r.Next(4);
+            direction = (Direction)Labirint.r.Next(4);  // рандомно задаём направление
             isHitPlayer = false;
         }
 
@@ -33,41 +33,46 @@ namespace Maze
 
         public static void InitialLabirint()
         {
-            l = Labirint.GetInstance();
+            l = Labirint.GetInstance();  // получаем объект Labirint, паттерн Одиночка
         }
 
         public void StopMoving()
         {
-            t.Stop();
+            t.Stop();  // остановка таймера
+        }
+
+        public void StartMoving()
+        {
+            t.Start();  // запуск таймера
         }
 
 
         private void SettingsTimer()
         {
             t = new Timer();
-            t.Interval = Labirint.r.Next(500, 700);
+            t.Interval = Labirint.r.Next(500, 700);  // рандомный интервал
             t.Tick += T_Tick;
         }
 
         private void T_Tick(object sender, EventArgs e)
         {
-            NextLocation();
+            NextLocation();  // для подсчёта следующих координат
 
-            if (CheckCollision())
+            if (CheckCollision())  // проверка столкновения
             {
-                ChangeDirection();
+                ChangeDirection();  // меняем направление
             }
 
-            if (isHitPlayer)
+            if (isHitPlayer)  // если попали на игрока
             {
-                Delete();
-                isHitPlayer = false;
-                l.CheckEndGame();
+                Delete();  // удаляем врага
+                l.EnemyHitPlayer(location);
             }
         }
 
         private void NextLocation()
         {
+            // подсчёта следующих координат
             switch (direction)
             {
                 case Direction.Up:
@@ -98,8 +103,9 @@ namespace Maze
             do
             {
                 num = Labirint.r.Next(4);
-                if (num != (int)direction) break;
-            } while(num == (int)direction);  // пока направление которое было, присвоилось снова
+                if (num != (int)direction) break;  // если это другое направление
+            } while(num == (int)direction);  // пока направление такое же, которое и было
+
             direction = (Direction)num;
         }
 
@@ -108,14 +114,13 @@ namespace Maze
             MazeObjectType type = l.Maze[nextLocation.Y, nextLocation.X].Type;
             switch (type)
             {
-                case MazeObjectType.Hall:
+                case MazeObjectType.Hall:  // если следующий объект это коридор, то двигаем
                     Move();
                     return false;
 
-                case MazeObjectType.Player:
-                    l.EnemyHitPlayer(location);
-                    t.Stop();
+                case MazeObjectType.Player:  // если игрок
                     isHitPlayer = true;
+                    StopMoving();  // останавливаем таймер
                     return false;
 
                 default:
@@ -134,11 +139,6 @@ namespace Maze
         private void Delete()
         {
             l.Maze[location.Y, location.X].ChangeBackgroundImage(MazeObjectType.Hall);  // очищаем
-        }
-
-        public void StartMoving()
-        {
-            t.Start();
         }
     }
 }

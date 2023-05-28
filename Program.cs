@@ -9,7 +9,7 @@ namespace Maze
         static void Main()
         {
             Application.EnableVisualStyles();
-            Application.Run(new Form1());
+            Application.Run(new CustomForm());
         }
     }
 }

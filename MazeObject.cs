@@ -54,6 +54,7 @@ namespace Maze
 
         public void ChangeBackgroundImage(MazeObjectType type)
         {
+            // меняем текстуру
             Type = type;
             pictureBox.BackgroundImage = Texture;
         }

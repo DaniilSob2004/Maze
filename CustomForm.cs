@@ -3,19 +3,22 @@ using System.Windows.Forms;
 
 namespace Maze
 {
-    public partial class Form1 : Form
+    public partial class CustomForm : Form
     {
         private int sizeX = 40;
         private int sizeY = 20;
         private int sizeElem = 16;
         private Labirint l;
 
-        public Form1()
+        public CustomForm()
         {
             InitializeComponent();
             Options();
+
+            // ПАТТЕРН ОДИНОЧКА
             l = Labirint.GetInstance(this, sizeX, sizeY, sizeElem);
-            InitialLabirintObjects();
+            InitialLabirintObjects();  // инициализация объекта лабаринта для всех классов
+
             GameSound.BackgroundMusic();
         }
 
@@ -23,7 +26,7 @@ namespace Maze
         {
             Text = "Maze";
 
-            FormBorderStyle = FormBorderStyle.FixedSingle;
+            FormBorderStyle = FormBorderStyle.FixedSingle;  // запрещено изменять размер окна
             BackColor = Color.FromArgb(255, 92, 118, 137);
 
             Width = sizeX * sizeElem + (Size.Width - ClientSize.Width);
@@ -40,14 +43,14 @@ namespace Maze
 
         private void StartGame()
         {
-            l.Show();
+            l.Show();  // вывод лабиринта
         }
 
-        private void Form1_KeyDown(object sender, KeyEventArgs e)
+        private void CustomForm_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Enter)
             {
-                l.BombPlanted();  // вызываем атаку игрока
+                l.BombPlanted();  // устанавливаем бомбу
             }
             else if (e.KeyCode == Keys.Escape)
             {
@@ -62,26 +65,18 @@ namespace Maze
         private void StartBtn_Click(object sender, System.EventArgs e)
         {
             ClearMenu();
-            System.GC.Collect();
             StartGame();
         }
 
         private void ExitBtn_Click(object sender, System.EventArgs e)
         {
             var answer = MessageBox.Show("Вы действительно хотите выйти?", "Question", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-            switch (answer)
-            {
-                case DialogResult.Yes:
-                    Close();
-                    break;
-
-                case DialogResult.No:
-                    break;
-            }
+            if (answer == DialogResult.Yes) Close();
         }
 
         private void ClearMenu()
         {
+            // удаляем элементы меню
             BackgroundImage = null;
             Controls.Remove(startBtn);
             Controls.Remove(exitBtn);

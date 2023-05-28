@@ -9,19 +9,19 @@ namespace Maze
     public class Labirint
     {
         public static Random r = new Random();
+        private static Labirint labirint = null;
 
         public enum GameValue { MaxHealth = 100, LossHealth = 25, AddHealth = 10, MaxEnergy = 500, LossEnergy = 1, AddEnergy = 25, BombPlanted = 50 };
-        public readonly Point finalPoint;  // координаты конца лабиринта
         public readonly Point startPoint;  // координаты начала лабиринта
-        private static Labirint labirint = null;
+        public readonly Point finalPoint;  // координаты конца лабиринта
 
         private int height;  // высота лабиринта
         private int width;  // ширина лабиринта
 
         private Form parent;  // родитель
         private Player player;
-        private MazeObject[,] maze;
-        private List<Enemy> enemies;
+        private MazeObject[,] maze;  // массив элементов лабиринта
+        private List<Enemy> enemies;  // список врагов
 
 
         private Labirint(Form parent, int width, int height, int sizeElem)
@@ -43,11 +43,10 @@ namespace Maze
 
 
         public MazeObject[,] Maze => maze;
-        public Point FinalPoint => finalPoint;
-        public Point StartPoint => startPoint;
         public Player Player => player;
 
 
+        // Паттерн ОДИНОЧКА
         public static Labirint GetInstance(Form parent = null, int width = 0, int height = 0, int sizeElem = 0)
         {
             if (labirint == null)
@@ -69,7 +68,11 @@ namespace Maze
 
         private void Generate()
         {
+            // генерация лабиринта
             bool isEnemy = false;
+
+            bool isFirstGen = false;  // является ли это первая генерация
+            if (maze[0, 0] == null) isFirstGen = true;
 
             for (int y = 0; y < height; y++)
             {
@@ -119,7 +122,7 @@ namespace Maze
                         }
                     }
 
-                    if (maze[y, x] == null)  // если первая генерация
+                    if (isFirstGen)  // если первая генерация
                     {
                         maze[y, x] = new MazeObject(current);
                         maze[y, x].PictureBox.Location = new Point(x * MazeObject.Size.Width, y * MazeObject.Size.Height);
@@ -129,9 +132,9 @@ namespace Maze
                     }
                     else maze[y, x].ChangeBackgroundImage(current);
 
-                    if (isEnemy)
+                    if (isEnemy)  // если сгенерился враг
                     {
-                        enemies.Add(new Enemy(new Point(x, y)));
+                        enemies.Add(new Enemy(new Point(x, y)));  // добавляем в список
                         isEnemy = false;
                     }
                 }
@@ -140,6 +143,7 @@ namespace Maze
 
         public void Show()
         {
+            // отображаем лабиринт
             if (!maze[0, 0].PictureBox.Visible)
             {
                 for (int y = 0; y < height; y++)
@@ -150,12 +154,13 @@ namespace Maze
                     }
                 }
             }
-            ShowInfo();
-            StartMovingEnemies();
+            ShowInfo();  // вывод статистики в заголовок окна
+            StartMovingEnemies();  // запуск движения врагов
         }
 
         public void ShowInfo()
         {
+            // статистика
             parent.Text = $"Maze   (Медалей:  {player.PlayersMedal}/{player.AllPlayersMedal},  Здоровье: {player.PlayersHealth}%,  Энергия: {player.PlayersEnergy},  Врагов: {enemies.Count})";
         }
 
@@ -165,13 +170,14 @@ namespace Maze
             int playerX = player.Location.X;
             int playerY = player.Location.Y;
 
+            // если на следующей координате нет столкновения, то двигаем и меняем координаты
             switch (e.KeyCode)
             {
                 case Keys.Up:
                     if (player.CheckCollision(playerX, playerY - 1))
                     {
                         player.Move(playerX, playerY - 1);
-                        player.Location = new Point(playerX, playerY - 1);
+                        player.SetY(playerY - 1);
                     }
                     break;
 
@@ -179,7 +185,7 @@ namespace Maze
                     if (player.CheckCollision(playerX, playerY + 1))
                     {
                         player.Move(playerX, playerY + 1);
-                        player.Location = new Point(playerX, playerY + 1);
+                        player.SetY(playerY + 1);
                     }
                     break;
 
@@ -187,7 +193,7 @@ namespace Maze
                     if (player.CheckCollision(playerX - 1, playerY))
                     {
                         player.Move(playerX - 1, playerY);
-                        player.Location = new Point(playerX - 1, playerY);
+                        player.SetX(playerX - 1);
                     }
                     break;
 
@@ -195,7 +201,7 @@ namespace Maze
                     if (player.CheckCollision(playerX + 1, playerY))
                     {
                         player.Move(playerX + 1, playerY);
-                        player.Location = new Point(playerX + 1, playerY);
+                        player.SetX(playerX + 1);
                     }
                     break;
             }
@@ -206,18 +212,19 @@ namespace Maze
                 player.IsHitEnemy = false;
             }
 
-            if (!CheckEndGame())
+            if (!CheckEndGame())  // проверка проигрыша
             {
                 CheckDrawingBomb();  // проверка отрисовки бомбы
             }
         }
+
 
         public void BombPlanted()
         {
             // если бомба устанавливается НЕ на одно и тоже место
             if (!player.IsBombPlanted)
             {
-                player.BombPlanted();
+                player.BombPlanted();  // устанавливаем бомбу
             }
         }
 
@@ -235,18 +242,21 @@ namespace Maze
 
         public void StartMovingEnemies()
         {
+            // запуск всех врагов
             foreach (Enemy enemy in enemies) enemy.StartMoving();
         }
 
         private void EndMovingEnemies()
         {
+            // остановка всех врагов
             foreach (Enemy enemy in enemies) enemy.StopMoving();
         }
 
         public void EnemyHitPlayer(Point enemyPoint)
         {
-            player.LossHealth();
-            DelEnemy(enemyPoint);
+            player.LossHealth();  // отнимаем жизнь
+            DelEnemy(enemyPoint);  // удаляем врага
+            CheckEndGame();  // проверка конца игры
         }
 
         public void AddEnemy()
@@ -258,11 +268,11 @@ namespace Maze
             {
                 randX = r.Next(width);
                 randY = r.Next(height);
-                if (maze[randY, randX].Type == MazeObjectType.Hall)
+                if (maze[randY, randX].Type == MazeObjectType.Hall)  // если это коридор
                 {
-                    maze[randY, randX].ChangeBackgroundImage(MazeObjectType.Enemy);
-                    enemies.Add(new Enemy(new Point(randX, randY)));
-                    enemies[enemies.Count - 1].StartMoving();
+                    maze[randY, randX].ChangeBackgroundImage(MazeObjectType.Enemy);  // меняем текстуру на врага
+                    enemies.Add(new Enemy(new Point(randX, randY)));  // добавляем в список
+                    enemies[enemies.Count - 1].StartMoving();  // враг движется
                     flag = true;
                 }
             } while (!flag);
@@ -270,18 +280,19 @@ namespace Maze
 
         public void DelEnemy(Point p)
         {
-            enemies.Remove(GetEnemyByLoacation(p));
+            Enemy delEnemy = GetEnemyByLoacation(p);  // получаем по координатам объект врага
+            delEnemy.StopMoving();  // останавливаем
+            enemies.Remove(delEnemy);  // удаляем из списка
+
             ShowInfo();
         }
 
         public Enemy GetEnemyByLoacation(Point p)
         {
+            // по координатам получаем объект врага
             foreach (Enemy enemy in enemies)
             {
-                if (enemy.Location == p)
-                {
-                    return enemy;
-                }
+                if (enemy.Location == p) return enemy;
             }
             return null;
         }
@@ -289,6 +300,7 @@ namespace Maze
 
         public bool CheckEndGame()
         {
+            // проверка проигрыша
             ShowInfo();
 
             if (player.PlayersHealth <= 0)
@@ -328,6 +340,7 @@ namespace Maze
 
         public void GameRestart(string text)
         {
+            // перезапуск лабиринта
             EndMovingEnemies();
             MessageBox.Show(text, "Message");
             StartSettings();

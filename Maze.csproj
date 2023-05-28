@@ -79,11 +79,11 @@
   <ItemGroup>
     <Compile Include="Bomb.cs" />
     <Compile Include="Enemy.cs" />
-    <Compile Include="Form1.cs">
+    <Compile Include="CustomForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Form1.Designer.cs">
-      <DependentUpon>Form1.cs</DependentUpon>
+    <Compile Include="CustomForm.Designer.cs">
+      <DependentUpon>CustomForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Labirint.cs" />
     <Compile Include="MazeObject.cs" />
@@ -91,8 +91,8 @@
     <Compile Include="PlaySound.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="Form1.resx">
-      <DependentUpon>Form1.cs</DependentUpon>
+    <EmbeddedResource Include="CustomForm.resx">
+      <DependentUpon>CustomForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
