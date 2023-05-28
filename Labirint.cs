@@ -11,7 +11,7 @@ namespace Maze
         public static Random r = new Random();
         private static Labirint labirint = null;
 
-        public enum GameValue { MaxHealth = 100, LossHealth = 25, AddHealth = 10, MaxEnergy = 500, LossEnergy = 1, AddEnergy = 25, BombPlanted = 50 };
+        public enum GameValue { MaxHealth = 100, LossHealth = 20, AddHealth = 10, MaxEnergy = 500, LossEnergy = 1, AddEnergy = 25, BombPlanted = 50 };
         public readonly Point startPoint;  // координаты начала лабиринта
         public readonly Point finalPoint;  // координаты конца лабиринта
 
