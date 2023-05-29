@@ -114,9 +114,13 @@ namespace Maze
             MazeObjectType type = l.Maze[nextLocation.Y, nextLocation.X].Type;
             switch (type)
             {
-                case MazeObjectType.Hall:  // если следующий объект это коридор, то двигаем
-                    Move();
-                    return false;
+                case MazeObjectType.Hall:  // если следующий объект это коридор и это не начало и не выход
+                    if (nextLocation != l.startPoint && nextLocation != l.finalPoint)
+                    {
+                        Move();  // двигаем
+                        return false;
+                    }
+                    return true;
 
                 case MazeObjectType.Player:  // если игрок
                     isHitPlayer = true;

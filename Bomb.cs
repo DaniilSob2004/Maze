@@ -114,15 +114,21 @@ namespace Maze
         private List<Point> GetPointsAroundBomb()
         {
             // все точки вокруг бомбы, начиная с верхней левой
-            List<Point> pAroundBomb = new List<Point> { new Point(location.X - 1, location.Y - 1),
-                                                        new Point(location.X, location.Y - 1),
-                                                        new Point(location.X + 1, location.Y - 1),
-                                                        new Point(location.X + 1, location.Y),
-                                                        new Point(location.X + 1, location.Y + 1),
-                                                        new Point(location.X, location.Y + 1),
-                                                        new Point(location.X - 1, location.Y + 1),
-                                                        new Point(location.X - 1, location.Y),
-                                                        location};
+            List<Point> pAroundBomb = new List<Point>();
+
+            pAroundBomb.Add(new Point(location.X, location.Y - 1));  // верхняя точка
+            pAroundBomb.Add(new Point(location.X + 1, location.Y - 1));  // верхняя-правая точка
+            pAroundBomb.Add(new Point(location.X + 1, location.Y));  // правая точка
+            pAroundBomb.Add(new Point(location.X + 1, location.Y + 1));  // правая-нижняя точка
+            pAroundBomb.Add(new Point(location.X, location.Y + 1));  // нижняя точка
+            pAroundBomb.Add(location);  // бомба
+
+            if (location != l.startPoint)  // если бомба установлена не на начало игры
+            {
+                pAroundBomb.Add(new Point(location.X - 1, location.Y - 1));  // левая-верхняя точка
+                pAroundBomb.Add(new Point(location.X - 1, location.Y + 1));  // левая-нижняя точка
+                pAroundBomb.Add(new Point(location.X - 1, location.Y));  // левая точка
+            }
 
             for (int i = 0; i < pAroundBomb.Count; i++)
             {
