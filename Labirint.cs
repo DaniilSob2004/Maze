@@ -11,6 +11,7 @@ namespace Maze
         public static Random r = new Random();
         private static Labirint labirint = null;
         private static ToolTip toolTip = new ToolTip();
+        public static bool isFirstGen = true;  // является ли это первая генерация
 
         public enum GameValue { MaxHealth = 100, LossHealth = 20, AddHealth = 10, MaxEnergy = 500, LossEnergy = 1, AddEnergy = 25, BombPlanted = 50 };
         public readonly Point startPoint;  // координаты начала лабиринта
@@ -81,9 +82,6 @@ namespace Maze
         {
             // генерация лабиринта
             bool isEnemy = false;
-
-            bool isFirstGen = false;  // является ли это первая генерация
-            if (maze[0, 0] == null) isFirstGen = true;
 
             for (int y = 0; y < height; y++)
             {
@@ -177,13 +175,13 @@ namespace Maze
         }
 
 
-        public void MovePLayer(KeyEventArgs e)
+        public void MovePLayer(Keys e)
         {
             int playerX = player.Location.X;
             int playerY = player.Location.Y;
 
             // если на следующей координате нет столкновения, то двигаем и меняем координаты
-            switch (e.KeyCode)
+            switch (e)
             {
                 case Keys.Up:
                     if (player.CheckCollision(playerX, playerY - 1))
@@ -258,7 +256,7 @@ namespace Maze
             foreach (Enemy enemy in enemies) enemy.StartMoving();
         }
 
-        private void EndMovingEnemies()
+        public void EndMovingEnemies()
         {
             // остановка всех врагов
             foreach (Enemy enemy in enemies) enemy.StopMoving();
@@ -354,7 +352,7 @@ namespace Maze
         {
             // перезапуск лабиринта
             EndMovingEnemies();
-            MessageBox.Show(text, "Message");
+            if (text != "") MessageBox.Show(text, "Message");
             StartSettings();
             Show();
         }

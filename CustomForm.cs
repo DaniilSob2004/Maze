@@ -46,40 +46,57 @@ namespace Maze
             l.Show();  // вывод лабиринта
         }
 
-        private void CustomForm_KeyDown(object sender, KeyEventArgs e)
+        private void BackToMenu()
         {
-            if (e.KeyCode == Keys.Enter)
+            var answer = MessageBox.Show("Хотите вернуться на главное меню?", "Question", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            if (answer == DialogResult.Yes)
             {
-                l.BombPlanted();  // устанавливаем бомбу
+                panel1.Visible = true;
+                Text = "Maze";
+                l.EndMovingEnemies();
             }
-            else if (e.KeyCode == Keys.Escape)
+        }
+
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            if (!panel1.Visible)  // если не главное меню, то обработчик клавиатуры будет срабатывать
             {
-                l.GameRestart("Перезапуск игры");  // перезапуск лабиринта
+                switch (keyData)
+                {
+                    case Keys.Escape:
+                        BackToMenu();  // обратно на главное меню
+                        return true;
+
+                    case Keys.Enter:
+                        l.BombPlanted();  // устанавливаем бомбу
+                        return true;
+
+                    default:
+                        l.MovePLayer(keyData);  // двигаем персонажа
+                        return true;
+                }
             }
-            else
-            {
-                l.MovePLayer(e);  // двигаем персонажа
-            }
+            return base.ProcessCmdKey(ref msg, keyData);
         }
 
         private void StartBtn_Click(object sender, System.EventArgs e)
         {
-            ClearMenu();
-            StartGame();
+            if (Labirint.isFirstGen)
+            {
+                StartGame();  // первый запуск
+                Labirint.isFirstGen = false;
+            }
+            else
+            {
+                l.GameRestart("");  // перезапуск лабиринта
+            }
+            panel1.Visible = false;
         }
 
         private void ExitBtn_Click(object sender, System.EventArgs e)
         {
             var answer = MessageBox.Show("Вы действительно хотите выйти?", "Question", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
             if (answer == DialogResult.Yes) Close();
-        }
-
-        private void ClearMenu()
-        {
-            // удаляем элементы меню
-            BackgroundImage = null;
-            Controls.Remove(startBtn);
-            Controls.Remove(exitBtn);
         }
     }
 }

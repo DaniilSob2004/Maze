@@ -31,13 +31,15 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(CustomForm));
             this.startBtn = new System.Windows.Forms.Button();
             this.exitBtn = new System.Windows.Forms.Button();
+            this.panel1 = new System.Windows.Forms.Panel();
+            this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
             // startBtn
             // 
             this.startBtn.BackColor = System.Drawing.Color.DarkOliveGreen;
             this.startBtn.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.startBtn.Location = new System.Drawing.Point(269, 129);
+            this.startBtn.Location = new System.Drawing.Point(274, 111);
             this.startBtn.Name = "startBtn";
             this.startBtn.Size = new System.Drawing.Size(100, 30);
             this.startBtn.TabIndex = 0;
@@ -49,7 +51,7 @@
             // 
             this.exitBtn.BackColor = System.Drawing.Color.DarkOliveGreen;
             this.exitBtn.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.exitBtn.Location = new System.Drawing.Point(269, 192);
+            this.exitBtn.Location = new System.Drawing.Point(274, 179);
             this.exitBtn.Name = "exitBtn";
             this.exitBtn.Size = new System.Drawing.Size(100, 30);
             this.exitBtn.TabIndex = 1;
@@ -57,19 +59,27 @@
             this.exitBtn.UseVisualStyleBackColor = false;
             this.exitBtn.Click += new System.EventHandler(this.ExitBtn_Click);
             // 
-            // Form1
+            // panel1
+            // 
+            this.panel1.BackgroundImage = global::Maze.Properties.Resources.main_01_polyana;
+            this.panel1.Controls.Add(this.startBtn);
+            this.panel1.Controls.Add(this.exitBtn);
+            this.panel1.Location = new System.Drawing.Point(-2, -1);
+            this.panel1.Name = "panel1";
+            this.panel1.Size = new System.Drawing.Size(642, 323);
+            this.panel1.TabIndex = 2;
+            // 
+            // CustomForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackgroundImage = global::Maze.Properties.Resources.main_01_polyana;
             this.ClientSize = new System.Drawing.Size(640, 320);
-            this.Controls.Add(this.exitBtn);
-            this.Controls.Add(this.startBtn);
+            this.Controls.Add(this.panel1);
             this.DoubleBuffered = true;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Name = "Form1";
+            this.Name = "CustomForm";
             this.Text = "Form1";
-            this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.CustomForm_KeyDown);
+            this.panel1.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -78,6 +88,7 @@
 
         private System.Windows.Forms.Button startBtn;
         private System.Windows.Forms.Button exitBtn;
+        private System.Windows.Forms.Panel panel1;
     }
 }
 
