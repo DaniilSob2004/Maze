@@ -10,6 +10,7 @@ namespace Maze
     {
         public static Random r = new Random();
         private static Labirint labirint = null;
+        private static ToolTip toolTip = new ToolTip();
 
         public enum GameValue { MaxHealth = 100, LossHealth = 20, AddHealth = 10, MaxEnergy = 500, LossEnergy = 1, AddEnergy = 25, BombPlanted = 50 };
         public readonly Point startPoint;  // координаты начала лабиринта
@@ -64,6 +65,16 @@ namespace Maze
             enemies.Clear();
 
             Generate();
+        }
+
+        private void SettingToolTip()
+        {
+            toolTip.IsBalloon = true;
+            toolTip.ToolTipIcon = ToolTipIcon.Info;
+            toolTip.InitialDelay = 500;
+            toolTip.ToolTipTitle = "Подсказка";
+            toolTip.SetToolTip(maze[startPoint.Y, startPoint.X].PictureBox, "Старт игрока");  // настраиваем подсказку для старта
+            toolTip.SetToolTip(maze[finalPoint.Y, finalPoint.X].PictureBox, "Выход");  // настраиваем подсказку для выхода
         }
 
         private void Generate()
@@ -153,6 +164,7 @@ namespace Maze
                         maze[y, x].PictureBox.Visible = true;
                     }
                 }
+                SettingToolTip();  // настройка подсказки
             }
             ShowInfo();  // вывод статистики в заголовок окна
             StartMovingEnemies();  // запуск движения врагов
